@@ -14,7 +14,7 @@
 2. high odometry output frequency, 4k-8kHz.
 3. robust to IMU saturation and severe vibration, and other aggressive motions (75 rad/s in our test).
 4. no motion distortion.
-5. computationally efficient, robust, versatile on public datasets with general motions. 
+5. computationally efficient, robust, versatile on public datasets with general motions.
 6. As an odometry, Point-LIO could be used in various autonomous tasks, such as trajectory planning, control, and perception, especially in cases involving very fast ego-motions (e.g., in the presence of severe vibration and high angular or linear velocity) or requiring high-rate odometry output and mapping (e.g., for high-rate feedback control and perception).
 
 **Important notes:**
@@ -73,11 +73,11 @@ Following the official [Eigen installation](eigen.tuxfamily.org/index.php?title=
 sudo apt-get install libeigen3-dev
 ```
 
-## **3.3 livox_ros_driver**
-Follow [livox_ros_driver Installation](https://github.com/Livox-SDK/livox_ros_driver).
+## **3.3 livox_ros_driver2**
+Follow [livox_ros_driver2 Installation](https://github.com/Livox-SDK/livox_ros_driver2).
 
 *Remarks:*
-- Since the Point-LIO supports Livox serials LiDAR, so the **livox_ros_driver** must be installed and **sourced** before run any Point-LIO luanch file.
+- Since the Point-LIO supports Livox serials LiDAR, so the **livox_ros_driver2** must be installed and **sourced** before run any Point-LIO luanch file.
 - How to source? The easiest way is add the line ``` source $Licox_ros_driver_dir$/devel/setup.bash ``` to the end of file ``` ~/.bashrc ```, where ``` $Licox_ros_driver_dir$ ``` is the directory of the livox ros driver workspace (should be the ``` ws_livox ``` directory if you completely followed the livox official document).
 
 ## 4. Build
@@ -92,22 +92,22 @@ Clone the repository and catkin_make:
     catkin_make
     source devel/setup.bash
 ```
-- Remember to source the livox_ros_driver before build (follow 3.3 **livox_ros_driver**)
+- Remember to source the livox_ros_driver2 before build (follow 3.3 **livox_ros_driver2**)
 - If you want to use a custom build of PCL, add the following line to ~/.bashrc
 ```export PCL_ROOT={CUSTOM_PCL_PATH}```
 
 ## 5. Directly run
 
 ### 5.1 For Avia
-Connect to your PC to Livox Avia LiDAR by following  [Livox-ros-driver installation](https://github.com/Livox-SDK/livox_ros_driver), then
+Connect to your PC to Livox Avia LiDAR by following  [Livox-ros-driver installation](https://github.com/Livox-SDK/livox_ros_driver2), then
 ```
     cd ~/$Point_LIO_ROS_DIR$
     source devel/setup.bash
     roslaunch point_lio mapping_avia.launch
-    roslaunch livox_ros_driver livox_lidar_msg.launch
+    roslaunch livox_ros_driver2 livox_lidar_msg.launch
 ```
-- For livox serials, Point-LIO only support the data collected by the ``` livox_lidar_msg.launch ``` since only its ``` livox_ros_driver/CustomMsg ``` data structure produces the timestamp of each LiDAR point which is very important for Point-LIO. ``` livox_lidar.launch ``` can not produce it right now.
-- If you want to change the frame rate, please modify the **publish_freq** parameter in the [livox_lidar_msg.launch](https://github.com/Livox-SDK/livox_ros_driver/blob/master/livox_ros_driver/launch/livox_lidar_msg.launch) of [Livox-ros-driver](https://github.com/Livox-SDK/livox_ros_driver) before make the livox_ros_driver pakage.
+- For livox serials, Point-LIO only support the data collected by the ``` livox_lidar_msg.launch ``` since only its ``` livox_ros_driver2/CustomMsg ``` data structure produces the timestamp of each LiDAR point which is very important for Point-LIO. ``` livox_lidar.launch ``` can not produce it right now.
+- If you want to change the frame rate, please modify the **publish_freq** parameter in the [livox_lidar_msg.launch](https://github.com/Livox-SDK/livox_ros_driver2/blob/master/livox_ros_driver2/launch/livox_lidar_msg.launch) of [Livox-ros-driver](https://github.com/Livox-SDK/livox_ros_driver2) before make the livox_ros_driver2 pakage.
 
 ### 5.2 For Livox serials with external IMU
 
@@ -153,7 +153,7 @@ Step C: Run LiDAR's ros driver or play rosbag.
 Set ``` pcd_save_enable ``` in launchfile to ``` 1 ```. All the scans (in global frame) will be accumulated and saved to the file ``` Point-LIO/PCD/scans.pcd ``` after the Point-LIO is terminated. ```pcl_viewer scans.pcd``` can visualize the point clouds.
 
 *Tips for pcl_viewer:*
-- change what to visualize/color by pressing keyboard 1,2,3,4,5 when pcl_viewer is running. 
+- change what to visualize/color by pressing keyboard 1,2,3,4,5 when pcl_viewer is running.
 ```
     1 is all random
     2 is X values
