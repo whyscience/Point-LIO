@@ -81,6 +81,10 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointClo
     hesai_handler(msg);
     break;
 
+  case MID360:
+    mid360_handler(msg);
+    break;
+
   default:
     printf("Error LiDAR Type");
     break;
@@ -130,6 +134,62 @@ void Preprocess::avia_handler(const livox_ros_driver2::CustomMsg::ConstPtr &msg)
   }
 
 }
+
+void Preprocess::mid360_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
+    pl_surf.clear();
+    // pl_corn.clear();
+    pcl::PointCloud<livox_ros::Point> pl_orig;
+    pcl::fromROSMsg(*msg, pl_orig);
+    int plsize = pl_orig.size();
+    // pl_corn.reserve(plsize);
+    pl_surf.reserve(plsize);
+
+    double time_stamp = msg->header.stamp.toSec();
+    uint valid_num = 0;
+
+    for (int i = 0; i < pl_orig.points.size(); i++)
+    {
+        if (i % point_filter_num != 0) continue;
+
+        if ((pl_orig.points[i].line < N_SCANS) &&
+            ((pl_orig.points[i].tag & 0x30) == 0x10 || (pl_orig.points[i].tag & 0x30) == 0x00))
+        {
+            valid_num ++;
+            if (valid_num % point_filter_num == 0)
+            {
+                double range = pl_orig.points[i].x * pl_orig.points[i].x +
+                               pl_orig.points[i].y * pl_orig.points[i].y +
+                               pl_orig.points[i].z * pl_orig.points[i].z;
+
+                if (range < (blind * blind)) continue;
+
+                PointType added_pt;
+                added_pt.x = pl_orig.points[i].x;
+                added_pt.y = pl_orig.points[i].y;
+                added_pt.z = pl_orig.points[i].z;
+                added_pt.intensity = pl_orig.points[i].intensity;
+                added_pt.curvature = pl_orig.points[i].timestamp * time_unit_scale/*/ float(1000000)*/; // curvature unit: ms
+
+                // 时间校正
+                if (i == 0)
+                {
+                    added_pt.curvature = fabs(added_pt.curvature) < 1.0 ? added_pt.curvature : 0.0;
+                }
+                else
+                {
+                    added_pt.curvature = fabs(added_pt.curvature - pl_surf.back().curvature) < 1.0
+                                             ? added_pt.curvature
+                                             : pl_surf.back().curvature + 0.004166667f;
+                }
+
+                pl_surf.points.push_back(added_pt);
+            }
+
+        }
+    }
+}
+
 
 void Preprocess::oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {

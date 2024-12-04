@@ -9,9 +9,10 @@ common:
     # the timesample of IMU is transferred from the current timeline to LiDAR's timeline by subtracting this value
 
 preprocess:
-    lidar_type: 1
-    scan_line: 6
-    timestamp_unit: 1   # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
+    lidar_type: 5 # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR 4 for XT32 LiDAR, 5 for Mid360 LiDAR
+    scan_line: 4
+    # / float(1000000)
+    timestamp_unit: 3   # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
     blind: 1.0
 
 mapping:
