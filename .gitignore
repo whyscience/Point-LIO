@@ -3,4 +3,5 @@
 *.pcd
 /.vscode/
 /Log/pos_log.csv
-/.vscode/
+/Log/mat_out.txt
+/Log/pos_log.txt

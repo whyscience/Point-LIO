@@ -9,7 +9,7 @@ common:
     # the timesample of IMU is transferred from the current timeline to LiDAR's timeline by subtracting this value
 
 preprocess:
-    lidar_type: 5 # 2 #velodyne                # 1 Livox Avia LiDAR  5: VELO_SIM
+    lidar_type: 5 # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR 4 for XT32 LiDAR, 5 for Mid360 LiDAR
     scan_line: 32 # 32 #velodyne 6 avia
     timestamp_unit: 3           # the unit of time/t field in the PointCloud2 rostopic: 0-second, 1-milisecond, 2-microsecond, 3-nanosecond.
     blind: 0.20
