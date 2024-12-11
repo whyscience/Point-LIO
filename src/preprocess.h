@@ -13,8 +13,8 @@ typedef pcl::PointXYZINormal PointType;
 typedef pcl::PointCloud<PointType> PointCloudXYZI;
 
 enum LID_TYPE {
-    AVIA = 1, VELO16, OUST64, HESAIxt32
-}; //{1, 2, 3, 4}
+    AVIA = 1, VELO16, OUST64, HESAIxt32, UNILIDAR
+}; //{1, 2, 3, 4, 5}
 enum TIME_UNIT {
     SEC = 0, MS = 1, US = 2, NS = 3
 };
@@ -81,6 +81,24 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(hesai_ros::Point,
                                           (float, intensity, intensity)
                                           (double, timestamp, timestamp)
                                           (std::uint16_t, ring, ring)
+)
+
+namespace unilidar_ros {
+    struct Point {
+        PCL_ADD_POINT4D
+        PCL_ADD_INTENSITY
+        std::uint16_t ring;
+        float time;
+
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    } EIGEN_ALIGN16;
+    }
+POINT_CLOUD_REGISTER_POINT_STRUCT(unilidar_ros::Point,
+    (float, x, x)(float, y, y)(float, z, z)
+    (float, intensity, intensity)
+    (std::uint16_t, ring, ring)
+    (float, time, time)
 )
 
 namespace ouster_ros {

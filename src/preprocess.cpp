@@ -75,6 +75,10 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::SharedPtr &msg, Po
             hesai_handler(msg);
             break;
 
+        case UNILIDAR:
+            unilidar_handler(msg);
+            break;
+
         default:
             printf("Error LiDAR Type");
             break;
@@ -331,6 +335,51 @@ void Preprocess::hesai_handler(const sensor_msgs::msg::PointCloud2::SharedPtr &m
         }
     }
 
+}
+
+void Preprocess::unilidar_handler(const sensor_msgs::msg::PointCloud2::ConstPtr &msg)
+{
+    pl_surf.clear();
+    pl_corn.clear();
+    pl_full.clear();
+
+    pcl::PointCloud<unilidar_ros::Point> pl_orig;
+    pcl::fromROSMsg(*msg, pl_orig);
+    int plsize = pl_orig.points.size();
+    if (plsize == 0) return;
+
+    pl_surf.reserve(plsize);
+
+    // std::cout << "plsize = " << plsize << ", given_offset_time = " << given_offset_time << std::endl;
+    int countElimnated = 0;
+    for (int i = 0; i < plsize; i++)
+    {
+      PointType added_pt;
+      
+      added_pt.normal_x = 0;
+      added_pt.normal_y = 0;
+      added_pt.normal_z = 0;
+
+      added_pt.x = pl_orig.points[i].x;
+      added_pt.y = pl_orig.points[i].y;
+      added_pt.z = pl_orig.points[i].z;
+      
+      added_pt.intensity = pl_orig.points[i].intensity;
+
+      added_pt.curvature = pl_orig.points[i].time * time_unit_scale; 
+
+      if (added_pt.x * added_pt.x + added_pt.y * added_pt.y + added_pt.z * added_pt.z > (blind * blind))
+      {
+        pl_surf.points.push_back(added_pt);
+      }
+      else
+      {
+        countElimnated++;
+      }
+    }
+
+    // std::cout << "pl_surf.size() = " << pl_surf.size() << ", countElimnated = " << countElimnated << std::endl;
+    
 }
 
 void Preprocess::give_feature(pcl::PointCloud<PointType> &pl, vector<orgtype> &types) {

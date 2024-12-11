@@ -88,7 +88,7 @@ Clone the repository and colcon build:
 
 ```
     cd ~/$Point_LIO_ROS_DIR$/src
-    git clone https://github.com/hku-mars/Point-LIO.git
+    git clone -b ros2 https://github.com/whyscience/Point-LIO.git
     cd Point-LIO
     git submodule update --init
     cd ../..
@@ -142,6 +142,21 @@ Edit ``` config/velodyne.yaml ``` to set the below parameters:
 7. Saturation value of IMU's accelerator and gyroscope: ```satu_acc```, ```satu_gyro```
 8. The norm of IMU's acceleration according to unit of acceleration messages: ``` acc_norm ```
 
+### 5.4 For Unitree 4D LiDAR L1
+Step A: Setup before run
+
+Edit ``` config/unilidar_l1.yaml ``` to set the below parameters:
+
+1. LiDAR point cloud topic name: ``` lid_topic ```
+2. IMU topic name: ``` imu_topic ``` (both internal and external, 6-aixes or 9-axies are fine)
+3. Set the parameter ```timestamp_unit``` 
+4. Line number (we tested 16, 32 and 64 line, but not tested 128 or above): ``` scan_line ```
+5. Translational extrinsic: ``` extrinsic_T ```
+6. Rotational extrinsic: ``` extrinsic_R ``` (only support rotation matrix)
+- The extrinsic parameters in Point-LIO is defined as the LiDAR's pose (position and rotation matrix) in IMU body frame (i.e. the IMU is the base frame).
+7. Saturation value of IMU's accelerator and gyroscope: ```satu_acc```, ```satu_gyro```
+8. The norm of IMU's acceleration according to unit of acceleration messages: ``` acc_norm ```
+
 Step B: Run below
 ```
     cd ~/$Point_LIO_ROS_DIR$
@@ -151,7 +166,7 @@ Step B: Run below
 
 Step C: Run LiDAR's ros driver or play rosbag.
 
-### 5.4 PCD file save
+### 5.5 PCD file save
 
 Set ``` pcd_save_enable ``` in launchfile to ``` 1 ```. All the scans (in global frame) will be accumulated and saved to the file ``` Point-LIO/PCD/scans.pcd ``` after the Point-LIO is terminated. ```pcl_viewer scans.pcd``` can visualize the point clouds.
 

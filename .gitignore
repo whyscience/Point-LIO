@@ -2,3 +2,4 @@
 /cmake-build-debug/
 *.pcd
 /Log/pos_log.csv
+/build
