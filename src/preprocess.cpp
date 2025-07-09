@@ -81,6 +81,10 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointClo
     hesai_handler(msg);
     break;
 
+  case MID360:
+    mid360_handler(msg);
+    break;
+
   default:
     printf("Error LiDAR Type");
     break;
@@ -130,6 +134,69 @@ void Preprocess::avia_handler(const livox_ros_driver2::CustomMsg::ConstPtr &msg)
   }
 
 }
+
+void Preprocess::mid360_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
+    ROS_INFO_ONCE("Mid360 PointCloud callback is called.");
+
+    // 清除之前的点云缓存
+    pl_surf.clear();
+    // pl_corn.clear();
+    pl_full.clear();
+
+    // 直接从 PointCloud2 转换为 PCL 格式
+    pcl::PointCloud<livox_ros::Point> pl_orig;
+    pcl::fromROSMsg(*msg, pl_orig);
+    int plsize = pl_orig.size();
+
+    if (plsize == 0) return;
+
+    pl_surf.reserve(plsize);
+    pl_full.resize(plsize);
+
+    // 计算时间基准
+    auto timebase = static_cast<uint64_t>(msg->header.stamp.toSec() * 1000000000.0);
+
+    for (int i = 0; i < N_SCANS; i++) {
+        pl_buff[i].clear();
+        pl_buff[i].reserve(plsize);
+    }
+
+    uint valid_num = 0;
+
+    // 分别对每个点云进行处理
+    for (uint i = 1; i < plsize; i++) {
+        // 只取线数在 0~N_SCANS 内并且回波次序为 0 或者 1 的点云
+        if ((pl_orig.points[i].line < N_SCANS) &&
+            ((pl_orig.points[i].tag & 0x30) == 0x10 || (pl_orig.points[i].tag & 0x30) == 0x00)) {
+            valid_num++;
+
+            // 等间隔降采样
+            if (valid_num % point_filter_num == 0) {
+                pl_full[i].x = pl_orig.points[i].x;
+                pl_full[i].y = pl_orig.points[i].y;
+                pl_full[i].z = pl_orig.points[i].z;
+                pl_full[i].intensity = pl_orig.points[i].intensity;
+
+                // 计算 offset_time
+                auto point_timestamp = static_cast<uint64_t>(pl_orig.points[i].timestamp * 1000000000.0);
+                uint32_t offset_time = (point_timestamp >= timebase) ?
+                                     static_cast<uint32_t>(point_timestamp - timebase) : 0;
+                pl_full[i].curvature = offset_time / static_cast<float>(1000000);
+
+                // 只有当当前点和上一点的间距足够大（>1e-7），并且在最小距离阈值之外，才将当前点认为是有用的点
+                if (((abs(pl_full[i].x - pl_full[i - 1].x) > 1e-7) ||
+                     (abs(pl_full[i].y - pl_full[i - 1].y) > 1e-7) ||
+                     (abs(pl_full[i].z - pl_full[i - 1].z) > 1e-7)) &&
+                    (pl_full[i].x * pl_full[i].x + pl_full[i].y * pl_full[i].y + pl_full[i].z * pl_full[i].z >
+                     (blind * blind))) {
+                    pl_surf.push_back(pl_full[i]);
+                }
+            }
+        }
+    }
+
+}
+
 
 void Preprocess::oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
