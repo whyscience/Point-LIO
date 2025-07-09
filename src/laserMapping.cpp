@@ -681,7 +681,7 @@ void set_posestamp(T & out)
 void publish_odometry(const ros::Publisher & pubOdomAftMapped)
 {
     odomAftMapped.header.frame_id = "camera_init";
-    odomAftMapped.child_frame_id = "body"; //
+    odomAftMapped.child_frame_id = "body";
     if (publish_odometry_without_downsample)
     {
         odomAftMapped.header.stamp = ros::Time().fromSec(time_current);
@@ -705,6 +705,7 @@ void publish_odometry(const ros::Publisher & pubOdomAftMapped)
     q.setY(odomAftMapped.pose.pose.orientation.y);
     q.setZ(odomAftMapped.pose.pose.orientation.z);
     transform.setRotation( q );
+    ROS_INFO("odomAftMapped.header.stamp = %lf", odomAftMapped.header.stamp.toSec());
     br.sendTransform( tf::StampedTransform( transform, odomAftMapped.header.stamp, "camera_init", "body" ) );
 }
 
